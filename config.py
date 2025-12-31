@@ -27,6 +27,7 @@ class Config:
     
     # 记忆配置
     MAX_HISTORY_LENGTH: int = int(os.getenv("MAX_HISTORY_LENGTH", "20"))
+    MEMORY_SUMMARY_INTERVAL: int = int(os.getenv("MEMORY_SUMMARY_INTERVAL", "600"))  # 秒，默认10分钟
     
     @classmethod
     def validate(cls) -> tuple[bool, Optional[str]]:
