@@ -8,9 +8,6 @@ from pathlib import Path
 class PersonaManager:
     """人设管理器，负责保存、加载和编辑人设"""
     
-    # 人设文件路径
-    PERSONA_FILE = Path("persona/persona.json")
-    
     # 默认人设模板
     DEFAULT_PERSONA = {
         "任务": "",
@@ -24,8 +21,21 @@ class PersonaManager:
         "备注": ""
     }
     
-    def __init__(self):
-        """初始化人设管理器"""
+    def __init__(self, user_id: Optional[int] = None):
+        """
+        初始化人设管理器
+        
+        Args:
+            user_id: 用户ID，如果提供则使用用户特定的文件路径，否则使用全局路径（向后兼容）
+        """
+        self.user_id = user_id
+        # 根据 user_id 确定文件路径
+        if user_id is not None:
+            self.PERSONA_FILE = Path(f"persona/user_{user_id}_persona.json")
+        else:
+            # 向后兼容：如果未提供 user_id，使用全局文件
+            self.PERSONA_FILE = Path("persona/persona.json")
+        
         # 确保persona目录存在
         self.PERSONA_FILE.parent.mkdir(exist_ok=True)
         self.persona = self.load_persona()

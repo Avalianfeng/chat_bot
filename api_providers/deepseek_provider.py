@@ -1,5 +1,5 @@
 """DeepSeek API提供者"""
-from typing import List, Dict
+from typing import List, Dict, Optional
 from openai import OpenAI
 from .base import BaseAPIProvider
 
@@ -25,12 +25,13 @@ class DeepSeekProvider(BaseAPIProvider):
             base_url=self.BASE_URL
         )
     
-    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+    def chat(self, messages: List[Dict[str, str]], api_key: Optional[str] = None, **kwargs) -> str:
         """
         发送聊天请求到DeepSeek API
         
         Args:
             messages: 消息列表
+            api_key: 可选的 API 密钥，如果提供则优先使用，否则使用默认密钥
             **kwargs: 其他参数（temperature, max_tokens等）
         
         Returns:
@@ -40,7 +41,17 @@ class DeepSeekProvider(BaseAPIProvider):
             Exception: API调用失败时抛出异常
         """
         try:
-            response = self.client.chat.completions.create(
+            # 如果传入了 api_key，使用它创建临时 client；否则使用默认 client
+            key_to_use = api_key or self.api_key
+            if api_key and api_key != self.api_key:
+                # 使用用户提供的 key 创建临时 client
+                from openai import OpenAI
+                client = OpenAI(api_key=key_to_use, base_url=self.BASE_URL)
+            else:
+                # 使用默认 client
+                client = self.client
+            
+            response = client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 **kwargs

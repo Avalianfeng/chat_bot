@@ -8,10 +8,21 @@ from datetime import datetime
 class LongTermMemory:
     """长期记忆管理器，持久化存储重要记忆"""
     
-    MEMORY_FILE = Path("memory/long_term_memory.json")
-    
-    def __init__(self):
-        """初始化长期记忆管理器"""
+    def __init__(self, user_id: Optional[int] = None):
+        """
+        初始化长期记忆管理器
+        
+        Args:
+            user_id: 用户ID，如果提供则使用用户特定的文件路径，否则使用全局路径（向后兼容）
+        """
+        self.user_id = user_id
+        # 根据 user_id 确定文件路径
+        if user_id is not None:
+            self.MEMORY_FILE = Path(f"memory/user_{user_id}_long_term_memory.json")
+        else:
+            # 向后兼容：如果未提供 user_id，使用全局文件
+            self.MEMORY_FILE = Path("memory/long_term_memory.json")
+        
         # 确保目录存在
         self.MEMORY_FILE.parent.mkdir(exist_ok=True)
         self.memories = self.load_memories()

@@ -15,13 +15,16 @@ from persona.persona_manager import PersonaManager
 class ChatBot:
     """聊天机器人核心类"""
     
-    def __init__(self, api_provider: Optional[BaseAPIProvider] = None):
+    def __init__(self, user_id: Optional[int] = None, api_provider: Optional[BaseAPIProvider] = None):
         """
         初始化聊天机器人
         
         Args:
+            user_id: 用户ID，用于数据隔离（可选，向后兼容）
             api_provider: API提供者实例，如果为None则根据配置自动创建
         """
+        self.user_id = user_id
+        
         # 验证配置
         is_valid, error_msg = Config.validate()
         if not is_valid:
@@ -32,18 +35,18 @@ class ChatBot:
             api_provider = self._create_api_provider()
         self.api_provider = api_provider
         
-        # 创建记忆管理器
+        # 创建记忆管理器（每个用户独立的实例）
         self.memory = SimpleMemory(max_length=Config.MAX_HISTORY_LENGTH)
         
-        # 创建长期记忆管理器
-        self.long_term_memory = LongTermMemory()
+        # 创建长期记忆管理器（按用户隔离）
+        self.long_term_memory = LongTermMemory(user_id=user_id)
         
         # 创建记忆过滤器和总结器
         self.memory_filter = MemoryFilter(self.api_provider)
         self.memory_summarizer = MemorySummarizer(self.api_provider)
         
-        # 加载人设并设置系统消息
-        self.persona_manager = PersonaManager()
+        # 加载人设并设置系统消息（按用户隔离）
+        self.persona_manager = PersonaManager(user_id=user_id)
         system_message = self._build_system_message()
         self.memory.set_system_message(system_message)
         
@@ -86,12 +89,13 @@ class ChatBot:
         else:
             raise ValueError(f"不支持的API提供者: {Config.API_PROVIDER}")
     
-    def chat(self, user_input: str) -> str:
+    def chat(self, user_input: str, api_key: Optional[str] = None) -> str:
         """
         处理用户输入并返回AI回复
         
         Args:
             user_input: 用户输入的消息
+            api_key: 可选的 API 密钥，如果提供则优先使用用户的 key，否则使用默认配置的 key
         
         Returns:
             AI的回复
@@ -115,8 +119,8 @@ class ChatBot:
         ]
         
         try:
-            # 调用API获取回复
-            response = self.api_provider.chat(formatted_messages)
+            # 调用API获取回复，传入用户提供的 api_key（如果有）
+            response = self.api_provider.chat(formatted_messages, api_key=api_key)
             
             # 添加AI回复到历史
             self.memory.add_message("assistant", response)

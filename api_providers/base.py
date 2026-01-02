@@ -18,12 +18,13 @@ class BaseAPIProvider(ABC):
         self.model = model
     
     @abstractmethod
-    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+    def chat(self, messages: List[Dict[str, str]], api_key: Optional[str] = None, **kwargs) -> str:
         """
         发送聊天请求
         
         Args:
             messages: 消息列表，格式为 [{"role": "user", "content": "..."}, ...]
+            api_key: 可选的 API 密钥，如果提供则优先使用，否则使用默认密钥
             **kwargs: 其他参数（如temperature等）
         
         Returns:

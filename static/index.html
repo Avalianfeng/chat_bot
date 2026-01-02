@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI聊天机器人 - 登录</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-box">
+            <h1>🤖 AI聊天机器人</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <button type="submit" class="btn-primary" id="loginBtn">登录</button>
+            </form>
+            <div class="login-footer">
+                <p>还没有账号？请联系管理员创建</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用界面（登录后显示） -->
+    <div id="appContainer" class="container" style="display: none;">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🤖 AI聊天机器人</h2>
+                <div class="user-info" id="userInfo">
+                    <span id="currentUsername">加载中...</span>
+                    <button class="btn-logout" id="logoutBtn">登出</button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <button class="menu-btn active" data-page="chat">
+                    💬 聊天
+                </button>
+                <button class="menu-btn" data-page="persona">
+                    👤 人设
+                </button>
+                <button class="menu-btn" data-page="memory">
+                    🧠 记忆
+                </button>
+                <button class="menu-btn" data-page="settings">
+                    ⚙️ 设置
+                </button>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-secondary" id="clearBtn">清空历史</button>
+                <button class="btn-secondary" id="summarizeBtn">总结对话</button>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 聊天页面 -->
+            <div class="page active" id="chat-page">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message system-message">
+                            <div class="message-content">
+                                欢迎使用 AI 聊天机器人！开始对话吧。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <textarea 
+                            id="chatInput" 
+                            placeholder="输入消息..." 
+                            rows="2"
+                        ></textarea>
+                        <button id="sendBtn" class="btn-primary">发送</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 人设页面 -->
+            <div class="page" id="persona-page">
+                <div class="page-header">
+                    <h2>人设管理</h2>
+                    <button class="btn-primary" id="savePersonaBtn">保存人设</button>
+                </div>
+                <div class="persona-editor">
+                    <div class="form-group">
+                        <label>任务</label>
+                        <textarea id="persona-task" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>角色</label>
+                        <textarea id="persona-role" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>外表</label>
+                        <textarea id="persona-appearance" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>经历</label>
+                        <textarea id="persona-experience" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>性格</label>
+                        <textarea id="persona-personality" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>喜好</label>
+                        <textarea id="persona-preference" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>经典台词</label>
+                        <textarea id="persona-catchphrase" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>输出示例</label>
+                        <textarea id="persona-example" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="persona-note" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 记忆页面 -->
+            <div class="page" id="memory-page">
+                <div class="page-header">
+                    <h2>长期记忆</h2>
+                    <button class="btn-secondary" id="refreshMemoryBtn">刷新</button>
+                </div>
+                <div class="memory-container" id="memoryContainer">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 设置页面 -->
+            <div class="page" id="settings-page">
+                <div class="page-header">
+                    <h2>API Key 设置</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>DeepSeek API Key</h3>
+                        <p class="settings-description">配置你的 DeepSeek API Key，如果未配置将使用系统默认 Key</p>
+                        <div class="api-key-form">
+                            <div class="form-group">
+                                <label for="deepseek-api-key">DeepSeek API Key</label>
+                                <input 
+                                    type="password" 
+                                    id="deepseek-api-key" 
+                                    placeholder="输入 DeepSeek API Key（可选）"
+                                    autocomplete="off"
+                                >
+                                <div class="api-key-status" id="deepseek-status"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-primary" id="saveDeepseekKeyBtn">保存</button>
+                                <button class="btn-secondary" id="clearDeepseekKeyBtn">清除</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>OpenAI API Key</h3>
+                        <p class="settings-description">配置你的 OpenAI API Key，如果未配置将使用系统默认 Key</p>
+                        <div class="api-key-form">
+                            <div class="form-group">
+                                <label for="openai-api-key">OpenAI API Key</label>
+                                <input 
+                                    type="password" 
+                                    id="openai-api-key" 
+                                    placeholder="输入 OpenAI API Key（可选）"
+                                    autocomplete="off"
+                                >
+                                <div class="api-key-status" id="openai-status"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-primary" id="saveOpenaiKeyBtn">保存</button>
+                                <button class="btn-secondary" id="clearOpenaiKeyBtn">清除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
