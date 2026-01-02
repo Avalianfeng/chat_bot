@@ -50,5 +50,5 @@ desktop.ini
 .conda/
 
 # 人设文件（如果包含敏感信息，可以取消注释）
-# persona/persona.json
+persona/persona.json
 

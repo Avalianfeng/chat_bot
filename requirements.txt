@@ -1,8 +1,18 @@
-openai>=1.0.0
-anthropic>=0.18.0
-python-dotenv>=1.0.0
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-sqlalchemy>=2.0.0
-passlib[bcrypt]>=1.7.4
-requests>=2.31.0
+# AI API 提供者
+openai>=1.0.0              # OpenAI SDK（也用于 DeepSeek，因为 DeepSeek 兼容 OpenAI 格式）
+anthropic>=0.18.0          # Anthropic Claude API（未来支持）
+
+# Web 框架
+fastapi>=0.104.0           # FastAPI Web 框架
+uvicorn[standard]>=0.24.0  # ASGI 服务器（标准版本包含额外性能优化）
+pydantic>=2.0.0            # 数据验证（FastAPI 依赖，但明确列出）
+
+# 数据库
+sqlalchemy>=2.0.0          # SQL ORM 框架
+
+# 安全
+passlib[bcrypt]>=1.7.4     # 密码加密（使用 bcrypt 算法）
+
+# 工具库
+python-dotenv>=1.0.0       # 环境变量管理（.env 文件）
+requests>=2.31.0           # HTTP 请求库（用于测试和 API 调用）
