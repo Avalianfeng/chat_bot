@@ -1,4 +1,4 @@
-name: my_chat_bot
+name: chat_bot
 channels:
   - conda-forge
   - defaults
