@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI聊天机器人</title>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Framer Motion (使用 lite 版本) -->
+    <script src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>
+    <style>
+        /* 主题变量 */
+        :root {
+            --transition-base: 0.3s ease;
+        }
+        
+        /* 科技感主题 */
+        [data-theme="tech"] {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --button-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --button-hover: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 12px 48px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 暖樱花感主题 */
+        [data-theme="sakura"] {
+            --bg-gradient: linear-gradient(135deg, #ffeef8 0%, #ffd6e8 50%, #ffc0d9 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(255, 182, 193, 0.3);
+            --text-primary: #8b4a6b;
+            --text-secondary: #a67a8e;
+            --button-primary: linear-gradient(135deg, #ff9ec4 0%, #ff7ba3 100%);
+            --button-hover: linear-gradient(135deg, #ff7ba3 0%, #ff9ec4 100%);
+            --input-bg: rgba(255, 255, 255, 0.95);
+            --input-border: rgba(255, 182, 193, 0.5);
+            --shadow: 0 8px 32px rgba(255, 182, 193, 0.2);
+            --shadow-hover: 0 12px 48px rgba(255, 182, 193, 0.3);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            transition: background var(--transition-base);
+        }
+        
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+            transition: all var(--transition-base);
+        }
+        
+        .glass-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: var(--button-primary);
+            color: white;
+            border: none;
+            transition: all var(--transition-base);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .input-field {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            transition: all var(--transition-base);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--button-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .text-primary {
+            color: var(--text-primary);
+        }
+        
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        /* 消息气泡动画 */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* 页面切换动画 */
+        .page-enter {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body data-theme="tech">
+    <div id="root"></div>
+    
+    <script type="text/babel" src="/static/app.jsx"></script>
+</body>
+</html>

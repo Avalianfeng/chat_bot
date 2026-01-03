@@ -3,195 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI聊天机器人 - 登录</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>AI聊天机器人</title>
+    <!-- React & ReactDOM (必须在最前面加载) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel Standalone for JSX (必须在 React 之后加载) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Framer Motion (可选，有降级方案) -->
+    <script src="https://unpkg.com/framer-motion@10/dist/framer-motion.js" onerror="console.warn('Framer Motion failed to load, using fallback')"></script>
+    <style>
+        /* A2UI 风格主题变量 */
+        :root {
+            --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 浅色模式 */
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f1f3f5;
+            --border-color: #e9ecef;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6c757d;
+            --text-tertiary: #adb5bd;
+            --accent-color: #0066ff;
+            --accent-hover: #0052cc;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 深色模式 */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #252525;
+            --bg-tertiary: #2d2d2d;
+            --border-color: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-tertiary: #808080;
+            --accent-color: #4a9eff;
+            --accent-hover: #6bb0ff;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background-color var(--transition-base), color var(--transition-base);
+        }
+        
+        /* A2UI 风格按钮 - 默认无边框，悬停显示阴影 */
+        .btn-base {
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: none;
+        }
+        
+        .btn-base:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-base:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        
+        .btn-base:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 主要按钮 - 带颜色 */
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        /* 输入框样式 */
+        .input-base {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all var(--transition-base);
+            width: 100%;
+        }
+        
+        .input-base:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        /* 卡片样式 */
+        .card-base {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all var(--transition-base);
+        }
+        
+        .card-base:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+    </style>
 </head>
-<body>
-    <!-- 登录界面 -->
-    <div id="loginContainer" class="login-container">
-        <div class="login-box">
-            <h1>🤖 AI聊天机器人</h1>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" name="username" required autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
-                </div>
-                <div id="loginError" class="error-message" style="display: none;"></div>
-                <button type="submit" class="btn-primary" id="loginBtn">登录</button>
-            </form>
-            <div class="login-footer">
-                <p>还没有账号？请联系管理员创建</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- 主应用界面（登录后显示） -->
-    <div id="appContainer" class="container" style="display: none;">
-        <!-- 侧边栏 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>🤖 AI聊天机器人</h2>
-                <div class="user-info" id="userInfo">
-                    <span id="currentUsername">加载中...</span>
-                    <button class="btn-logout" id="logoutBtn">登出</button>
-                </div>
-            </div>
-            <div class="sidebar-menu">
-                <button class="menu-btn active" data-page="chat">
-                    💬 聊天
-                </button>
-                <button class="menu-btn" data-page="persona">
-                    👤 人设
-                </button>
-                <button class="menu-btn" data-page="memory">
-                    🧠 记忆
-                </button>
-                <button class="menu-btn" data-page="settings">
-                    ⚙️ 设置
-                </button>
-            </div>
-            <div class="sidebar-footer">
-                <button class="btn-secondary" id="clearBtn">清空历史</button>
-                <button class="btn-secondary" id="summarizeBtn">总结对话</button>
-            </div>
-        </div>
-
-        <!-- 主内容区 -->
-        <div class="main-content">
-            <!-- 聊天页面 -->
-            <div class="page active" id="chat-page">
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message system-message">
-                            <div class="message-content">
-                                欢迎使用 AI 聊天机器人！开始对话吧。
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chat-input-container">
-                        <textarea 
-                            id="chatInput" 
-                            placeholder="输入消息..." 
-                            rows="2"
-                        ></textarea>
-                        <button id="sendBtn" class="btn-primary">发送</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 人设页面 -->
-            <div class="page" id="persona-page">
-                <div class="page-header">
-                    <h2>人设管理</h2>
-                    <button class="btn-primary" id="savePersonaBtn">保存人设</button>
-                </div>
-                <div class="persona-editor">
-                    <div class="form-group">
-                        <label>任务</label>
-                        <textarea id="persona-task" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>角色</label>
-                        <textarea id="persona-role" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>外表</label>
-                        <textarea id="persona-appearance" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>经历</label>
-                        <textarea id="persona-experience" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>性格</label>
-                        <textarea id="persona-personality" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>喜好</label>
-                        <textarea id="persona-preference" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>经典台词</label>
-                        <textarea id="persona-catchphrase" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>输出示例</label>
-                        <textarea id="persona-example" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>备注</label>
-                        <textarea id="persona-note" rows="2"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 记忆页面 -->
-            <div class="page" id="memory-page">
-                <div class="page-header">
-                    <h2>长期记忆</h2>
-                    <button class="btn-secondary" id="refreshMemoryBtn">刷新</button>
-                </div>
-                <div class="memory-container" id="memoryContainer">
-                    <div class="loading">加载中...</div>
-                </div>
-            </div>
-
-            <!-- 设置页面 -->
-            <div class="page" id="settings-page">
-                <div class="page-header">
-                    <h2>API Key 设置</h2>
-                </div>
-                <div class="settings-container">
-                    <div class="settings-section">
-                        <h3>DeepSeek API Key</h3>
-                        <p class="settings-description">配置你的 DeepSeek API Key，如果未配置将使用系统默认 Key</p>
-                        <div class="api-key-form">
-                            <div class="form-group">
-                                <label for="deepseek-api-key">DeepSeek API Key</label>
-                                <input 
-                                    type="password" 
-                                    id="deepseek-api-key" 
-                                    placeholder="输入 DeepSeek API Key（可选）"
-                                    autocomplete="off"
-                                >
-                                <div class="api-key-status" id="deepseek-status"></div>
-                            </div>
-                            <div class="form-actions">
-                                <button class="btn-primary" id="saveDeepseekKeyBtn">保存</button>
-                                <button class="btn-secondary" id="clearDeepseekKeyBtn">清除</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <h3>OpenAI API Key</h3>
-                        <p class="settings-description">配置你的 OpenAI API Key，如果未配置将使用系统默认 Key</p>
-                        <div class="api-key-form">
-                            <div class="form-group">
-                                <label for="openai-api-key">OpenAI API Key</label>
-                                <input 
-                                    type="password" 
-                                    id="openai-api-key" 
-                                    placeholder="输入 OpenAI API Key（可选）"
-                                    autocomplete="off"
-                                >
-                                <div class="api-key-status" id="openai-status"></div>
-                            </div>
-                            <div class="form-actions">
-                                <button class="btn-primary" id="saveOpenaiKeyBtn">保存</button>
-                                <button class="btn-secondary" id="clearOpenaiKeyBtn">清除</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="/static/app.js"></script>
+<body data-theme="light">
+    <div id="root"></div>
+    
+    <!-- 加载 JSX 文件（添加版本号避免缓存） -->
+    <script type="text/babel" src="/static/app.jsx?v=3"></script>
+    <script>
+        // 错误处理
+        window.addEventListener('error', function(e) {
+            console.error('Global Error:', e.error);
+            const root = document.getElementById('root');
+            if (root && !root.hasChildNodes()) {
+                root.innerHTML = 
+                    '<div style="color: white; padding: 20px; text-align: center;">' +
+                    '<h2>加载错误</h2>' +
+                    '<p>请检查浏览器控制台查看详细错误信息</p>' +
+                    '<pre style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; text-align: left; max-width: 800px; margin: 0 auto;">' +
+                    (e.error ? e.error.toString() : '未知错误') +
+                    '</pre></div>';
+            }
+        });
+        
+        // 监听脚本加载错误
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled Promise Rejection:', e.reason);
+        });
+    </script>
 </body>
 </html>
