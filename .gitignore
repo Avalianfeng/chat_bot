@@ -61,3 +61,7 @@ memory/long_term_memory.json
 persona/persona.json
 persona/user_*_persona.json
 
+# 测试文件
+test_user_api.py
+test_user_isolation.py
+verify_isolation.py

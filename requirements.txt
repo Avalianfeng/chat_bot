@@ -1,45 +1,25 @@
-annotated-doc @ file:///C:/miniconda3/conda-bld/annotated-doc_1763372679168/work
-annotated-types @ file:///C:/miniconda3/conda-bld/annotated-types_1761745107361/work
-anthropic @ file:///C:/Users/task_176605448170782/croot/anthropic_1766054599354/work
-anyio @ file:///C:/miniconda3/conda-bld/anyio_1758622433823/work
-argon2-cffi @ file:///C:/Users/task_176606717499708/croot/argon2-cffi_1766067891508/work
-argon2-cffi-bindings @ file:///C:/miniconda3/conda-bld/argon2-cffi-bindings_1757925023673/work
-bcrypt @ file:///C:/miniconda3/conda-bld/bcrypt_1762875213278/work
-brotlicffi @ file:///C:/miniconda3/conda-bld/brotlicffi_1764961374486/work
-certifi @ file:///C:/miniconda3/conda-bld/certifi_1763135348719/work/certifi
-cffi @ file:///C:/miniconda3/conda-bld/cffi_1761832792955/work
-charset-normalizer @ file:///C:/miniconda3/conda-bld/charset-normalizer_1761744975868/work
-click @ file:///C:/miniconda3/conda-bld/click_1764332372183/work
-colorama @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/colorama_1729036581634/work
-cryptography @ file:///C:/miniconda3/conda-bld/cryptography-split_1761932023265/work
-distro @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/distro_1729059153117/work
-fastapi @ file:///C:/miniconda3/conda-bld/fastapi_1763380185717/work
-greenlet @ file:///C:/miniconda3/conda-bld/greenlet_1757405549674/work
-h11 @ file:///C:/miniconda3/conda-bld/h11_1761931384726/work
-httpcore @ file:///C:/b/abs_25m7_xthp6/croot/httpcore_1748526065845/work
-httptools==0.7.1
-httpx @ file:///C:/miniconda3/conda-bld/httpx_1760447475275/work
-idna @ file:///C:/miniconda3/conda-bld/idna_1761912043388/work
-jiter @ file:///C:/miniconda3/conda-bld/jiter_1762897303954/work
-openai @ file:///C:/Users/task_176716792585288/croot/openai_1767168046650/work
-passlib @ file:///C:/miniconda3/conda-bld/passlib_1763393437494/work
-pycparser @ file:///C:/miniconda3/conda-bld/pycparser_1757496153123/work
-pydantic @ file:///C:/miniconda3/conda-bld/pydantic_1764083582233/work
-pydantic_core @ file:///C:/miniconda3/conda-bld/pydantic-core_1764009799098/work
-PySocks @ file:///C:/miniconda3/conda-bld/pysocks_1761753030965/work
-python-dotenv @ file:///C:/b/abs_71cpoh9hpg/croot/python-dotenv_1745613639902/work
-PyYAML==6.0.3
-requests @ file:///C:/miniconda3/conda-bld/requests_1762359611326/work
-setuptools==80.9.0
-sniffio @ file:///C:/miniconda3/conda-bld/sniffio_1764329222593/work
-SQLAlchemy @ file:///C:/b/abs_52irs3wj21/croot/sqlalchemy_1756710015498/work
-starlette @ file:///C:/miniconda3/conda-bld/starlette-recipe_1756910697974/work
-tqdm @ file:///C:/miniconda3/conda-bld/tqdm_1762863407729/work
-typing-inspection @ file:///C:/miniconda3/conda-bld/typing-inspection_1760614188477/work
-typing_extensions @ file:///C:/b/abs_ecq8gc0vbm/croot/typing_extensions_1756281142218/work
-urllib3 @ file:///C:/miniconda3/conda-bld/urllib3_1765399243000/work
-uvicorn @ file:///C:/b/abs_e17rwqwbyy/croot/uvicorn-split_1751615749218/work
-watchfiles==1.1.1
-websockets==15.0.1
-wheel==0.45.1
-win_inet_pton @ file:///C:/miniconda3/conda-bld/win_inet_pton_1761746278300/work
+# Web框架和服务器
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# 数据库
+sqlalchemy>=2.0.0
+
+# 认证和密码加密
+passlib[bcrypt]>=1.7.4
+
+# API客户端
+openai>=1.0.0
+
+# 数据验证
+pydantic>=2.0.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# HTTP客户端（用于API调用）
+httpx>=0.25.0
+
+# 工具库
+pyyaml>=6.0.0
