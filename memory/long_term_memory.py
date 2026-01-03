@@ -37,12 +37,43 @@ class LongTermMemory:
         if self.MEMORY_FILE.exists():
             try:
                 with open(self.MEMORY_FILE, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    memories = json.load(f)
+                # 确保所有必需的字段都存在（向后兼容旧版本文件）
+                return self._ensure_memory_structure(memories)
             except Exception as e:
                 print(f"加载长期记忆失败: {e}，使用空记忆")
                 return self._create_empty_memory()
         else:
             return self._create_empty_memory()
+    
+    def _ensure_memory_structure(self, memories: Dict) -> Dict:
+        """
+        确保记忆字典包含所有必需的字段（向后兼容）
+        
+        Args:
+            memories: 从文件加载的记忆字典
+            
+        Returns:
+            补全后的记忆字典
+        """
+        # 获取标准的空记忆结构作为模板
+        default_memory = self._create_empty_memory()
+        
+        # 如果 memories 缺少任何字段，使用默认值
+        for key, default_value in default_memory.items():
+            if key not in memories:
+                memories[key] = default_value
+            elif key == "conversation_summaries" and not isinstance(memories[key], list):
+                # 确保 conversation_summaries 是列表
+                memories[key] = []
+            elif key == "notes_for_future" and not isinstance(memories[key], str):
+                # 确保 notes_for_future 是字符串
+                memories[key] = ""
+            elif isinstance(default_value, list) and not isinstance(memories[key], list):
+                # 其他列表字段如果不是列表，初始化为空列表
+                memories[key] = []
+        
+        return memories
     
     def _create_empty_memory(self) -> Dict:
         """创建空的记忆结构"""
@@ -142,6 +173,12 @@ class LongTermMemory:
             "created_at": datetime.now().isoformat()
         }
         
+        # 确保 conversation_summaries 字段存在
+        if "conversation_summaries" not in self.memories:
+            self.memories["conversation_summaries"] = []
+        if not isinstance(self.memories["conversation_summaries"], list):
+            self.memories["conversation_summaries"] = []
+        
         self.memories["conversation_summaries"].append(summary_item)
         
         # 添加新记忆
@@ -162,6 +199,12 @@ class LongTermMemory:
         
         # 更新未来对话建议
         if summary.get("notes_for_future_conversation"):
+            # 确保 notes_for_future 字段存在
+            if "notes_for_future" not in self.memories:
+                self.memories["notes_for_future"] = ""
+            if not isinstance(self.memories["notes_for_future"], str):
+                self.memories["notes_for_future"] = ""
+            
             if self.memories["notes_for_future"]:
                 self.memories["notes_for_future"] += "\n" + summary["notes_for_future_conversation"]
             else:
