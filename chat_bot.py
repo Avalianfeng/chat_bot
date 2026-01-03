@@ -155,9 +155,12 @@ class ChatBot:
                 # 清空待总结对话
                 self.pending_conversation = []
     
-    def _summarize_conversation(self) -> None:
+    def _summarize_conversation(self, api_key: Optional[str] = None) -> None:
         """
         总结对话并保存到长期记忆
+        
+        Args:
+            api_key: 可选的 API 密钥，用于总结时的 API 调用
         """
         if not self.pending_conversation:
             return
@@ -165,7 +168,7 @@ class ChatBot:
         print("\n[记忆系统] 正在分析对话...")
         
         # Step 1: 判断是否值得存储
-        filter_result = self.memory_filter.should_save(self.pending_conversation)
+        filter_result = self.memory_filter.should_save(self.pending_conversation, api_key=api_key)
         
         if not filter_result.get("should_save", False):
             print(f"[记忆系统] 对话不值得存储: {filter_result.get('reason', '无重要信息')}")
@@ -175,7 +178,7 @@ class ChatBot:
         print("[记忆系统] 正在提取记忆...")
         
         # Step 2: 提取和总结记忆
-        summary_result = self.memory_summarizer.summarize(self.pending_conversation)
+        summary_result = self.memory_summarizer.summarize(self.pending_conversation, api_key=api_key)
         
         # Step 3: 保存到长期记忆
         if summary_result.get("should_save_memory", False):
@@ -191,11 +194,14 @@ class ChatBot:
         else:
             print("[记忆系统] 未提取到值得保存的记忆")
     
-    def force_summarize(self) -> None:
+    def force_summarize(self, api_key: Optional[str] = None) -> None:
         """
         强制立即总结当前对话（手动触发）
+        
+        Args:
+            api_key: 可选的 API 密钥，用于总结时的 API 调用
         """
-        self._summarize_conversation()
+        self._summarize_conversation(api_key=api_key)
         self.pending_conversation = []
     
     def set_system_message(self, content: str) -> None:

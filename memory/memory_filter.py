@@ -1,6 +1,6 @@
 """记忆过滤器 - 判断对话是否值得存储"""
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 from api_providers.base import BaseAPIProvider
 
 
@@ -53,12 +53,13 @@ class MemoryFilter:
         """
         self.api_provider = api_provider
     
-    def should_save(self, conversation: List[Dict[str, str]]) -> Dict[str, any]:
+    def should_save(self, conversation: List[Dict[str, str]], api_key: Optional[str] = None) -> Dict[str, any]:
         """
         判断对话是否值得存储
         
         Args:
             conversation: 对话历史列表，格式为 [{"role": "user", "content": "..."}, ...]
+            api_key: 可选的 API 密钥，如果提供则优先使用，否则使用 provider 的默认 key
         
         Returns:
             {
@@ -76,8 +77,8 @@ class MemoryFilter:
         ]
         
         try:
-            # 调用API
-            response = self.api_provider.chat(messages)
+            # 调用API，传递 api_key（如果提供）
+            response = self.api_provider.chat(messages, api_key=api_key)
             
             # 解析JSON响应
             # 尝试提取JSON（可能包含markdown代码块）

@@ -1,6 +1,6 @@
 """记忆总结器 - 提取和总结值得长期记忆的内容"""
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 from api_providers.base import BaseAPIProvider
 
 
@@ -75,12 +75,13 @@ class MemorySummarizer:
         """
         self.api_provider = api_provider
     
-    def summarize(self, conversation: List[Dict[str, str]]) -> Dict[str, any]:
+    def summarize(self, conversation: List[Dict[str, str]], api_key: Optional[str] = None) -> Dict[str, any]:
         """
         总结对话并提取记忆
         
         Args:
             conversation: 对话历史列表
+            api_key: 可选的 API 密钥，如果提供则优先使用，否则使用 provider 的默认 key
         
         Returns:
             总结结果字典
@@ -95,8 +96,8 @@ class MemorySummarizer:
         ]
         
         try:
-            # 调用API
-            response = self.api_provider.chat(messages)
+            # 调用API，传递 api_key（如果提供）
+            response = self.api_provider.chat(messages, api_key=api_key)
             
             # 解析JSON响应
             response = response.strip()

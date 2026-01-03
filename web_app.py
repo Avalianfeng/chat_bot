@@ -711,6 +711,159 @@ async def update_persona(
         )
 
 
+# ========== 记忆API接口 ==========
+
+class MemoryResponse(BaseModel):
+    """记忆响应"""
+    success: bool
+    memories: Optional[Dict] = None
+    message: Optional[str] = None
+
+
+@app.get("/api/memory", response_model=MemoryResponse)
+async def get_memory(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    获取当前用户的长期记忆
+    
+    Args:
+        current_user: 当前登录用户
+    
+    Returns:
+        长期记忆数据
+    """
+    try:
+        # 判断是否是 admin 用户
+        is_admin = _is_admin_user(current_user)
+        
+        # 获取该用户的 ChatBot 实例
+        bot = bot_manager.get_bot_for_user(current_user.id, is_admin=is_admin)
+        
+        # 重新加载记忆（确保获取最新数据）
+        bot.long_term_memory.memories = bot.long_term_memory.load_memories()
+        
+        # 获取所有记忆
+        memories = bot.long_term_memory.get_all_memories()
+        
+        return MemoryResponse(
+            success=True,
+            memories=memories
+        )
+    except Exception as e:
+        print(f"获取长期记忆错误 (用户 {current_user.id}): {e}")
+        return MemoryResponse(
+            success=False,
+            message=f"获取长期记忆失败: {str(e)}"
+        )
+
+
+class SummarizeResponse(BaseModel):
+    """总结响应"""
+    success: bool
+    message: str
+
+
+@app.post("/api/summarize", response_model=SummarizeResponse)
+async def summarize_conversation(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    手动触发总结当前对话
+    
+    Args:
+        current_user: 当前登录用户
+    
+    Returns:
+        总结结果
+    """
+    try:
+        # 判断是否是 admin 用户
+        is_admin = _is_admin_user(current_user)
+        
+        # 获取该用户的 ChatBot 实例
+        bot = bot_manager.get_bot_for_user(current_user.id, is_admin=is_admin)
+        
+        # 检查是否有待总结的对话
+        if not bot.pending_conversation:
+            return SummarizeResponse(
+                success=False,
+                message="当前没有待总结的对话"
+            )
+        
+        # 从用户配置中获取对应 provider 的 API Key（总结需要调用 API）
+        try:
+            user_api_key = _get_user_api_key_for_provider(current_user, bot.api_provider.__class__.__name__)
+        except ValueError as e:
+            # 非 admin 用户未配置 Key
+            return SummarizeResponse(
+                success=False,
+                message=str(e)
+            )
+        
+        # 强制总结对话（传递用户的 API Key）
+        bot.force_summarize(api_key=user_api_key)
+        
+        # 重新加载长期记忆以确保数据已保存
+        bot.long_term_memory.memories = bot.long_term_memory.load_memories()
+        
+        return SummarizeResponse(
+            success=True,
+            message="对话总结完成"
+        )
+        
+    except Exception as e:
+        print(f"总结对话错误 (用户 {current_user.id}): {e}")
+        import traceback
+        traceback.print_exc()
+        return SummarizeResponse(
+            success=False,
+            message=f"总结对话失败: {str(e)}"
+        )
+
+
+class ClearHistoryResponse(BaseModel):
+    """清空历史响应"""
+    success: bool
+    message: str
+
+
+@app.post("/api/clear", response_model=ClearHistoryResponse)
+async def clear_history(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    清空当前用户的对话历史
+    
+    Args:
+        current_user: 当前登录用户
+    
+    Returns:
+        清空结果
+    """
+    try:
+        # 判断是否是 admin 用户
+        is_admin = _is_admin_user(current_user)
+        
+        # 获取该用户的 ChatBot 实例
+        bot = bot_manager.get_bot_for_user(current_user.id, is_admin=is_admin)
+        
+        # 清空历史
+        bot.clear_history()
+        bot.pending_conversation = []  # 同时清空待总结的对话
+        
+        return ClearHistoryResponse(
+            success=True,
+            message="历史已清空"
+        )
+    except Exception as e:
+        print(f"清空历史错误 (用户 {current_user.id}): {e}")
+        return ClearHistoryResponse(
+            success=False,
+            message=f"清空历史失败: {str(e)}"
+        )
+
+
 @app.get("/health")
 async def health_check():
     """健康检查"""
