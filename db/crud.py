@@ -136,3 +136,52 @@ def search_users_by_username(
     query = db.query(User).filter(User.username.contains(username))
     
     return query.offset(skip).limit(limit).all()
+
+
+def update_user_password(db: Session, user_id: int, new_password: str) -> Optional[User]:
+    """
+    更新用户密码
+    
+    Args:
+        db: 数据库会话
+        user_id: 用户 ID
+        new_password: 新密码（明文，会被加密）
+        
+    Returns:
+        更新后的用户对象，如果用户不存在则返回 None
+    """
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return None
+    
+    # 加密新密码
+    user.password_hash = hash_password(new_password)
+    db.commit()
+    db.refresh(user)
+    
+    return user
+
+
+def delete_user(db: Session, user_id: int) -> bool:
+    """
+    删除用户及其关联数据
+    
+    Args:
+        db: 数据库会话
+        user_id: 用户 ID
+        
+    Returns:
+        是否删除成功（用户不存在也返回 False）
+        
+    Note:
+        - 数据库中的 Session 记录会通过外键 cascade 自动删除
+        - 文件系统中的用户数据（记忆、人设文件）需要调用方单独清理
+    """
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False
+    
+    db.delete(user)
+    db.commit()
+    
+    return True
