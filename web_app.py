@@ -1,11 +1,14 @@
 """FastAPI Web 应用入口"""
-from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie
+from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict 
 from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
+import traceback
+import logging
 
 from db.database import init_db, get_db
 from db import crud
@@ -14,6 +17,10 @@ from security.password import verify_password
 from security.auth import create_session, delete_session, get_current_user
 from chat_bot_manager import ChatBotManager
 import json
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # 创建 FastAPI 应用
 app = FastAPI(title="AI聊天机器人 API", version="1.0.0")
@@ -106,6 +113,37 @@ app.add_middleware(
 
 # 挂载静态文件目录
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+# ========== 全局异常处理器 ==========
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    全局异常处理器，确保所有异常都返回 JSON 格式
+    解决远程服务器上可能出现的 500 错误返回非 JSON 格式的问题
+    """
+    logger.error(f"未捕获的异常: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": str(exc),
+            "error": "Internal Server Error",
+            "type": type(exc).__name__
+        }
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """请求验证异常处理器"""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": exc.errors(),
+            "error": "Validation Error"
+        }
+    )
 
 
 @app.on_event("startup")
@@ -379,6 +417,53 @@ async def list_users(
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取用户列表失败: {str(e)}")
+
+
+@app.get("/admin/users/search", response_model=List[UserResponse])
+async def search_users(
+    username: str,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)  # 需要登录
+):
+    """
+    根据用户名搜索用户列表（支持部分匹配，管理接口，需要登录）
+    
+    Args:
+        username: 用户名（支持部分匹配）
+        skip: 跳过的记录数
+        limit: 返回的最大记录数
+        db: 数据库会话
+        current_user: 当前登录用户
+        
+    Returns:
+        匹配的用户列表
+    """
+    try:
+        if not username or not username.strip():
+            raise HTTPException(status_code=400, detail="用户名不能为空")
+        
+        users = crud.search_users_by_username(
+            db=db, 
+            username=username.strip(), 
+            skip=skip, 
+            limit=limit
+        )
+        
+        return [
+            UserResponse(
+                id=user.id,
+                username=user.username,
+                api_key=user.api_key,
+                created_at=user.created_at.isoformat()
+            )
+            for user in users
+        ]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"搜索用户失败: {str(e)}")
 
 
 @app.get("/admin/users/{user_id}", response_model=UserResponse)

@@ -65,3 +65,7 @@ persona/user_*_persona.json
 test_user_api.py
 test_user_isolation.py
 verify_isolation.py
+
+#部分说明文档
+API_USAGE.md
+REMOTE_SERVER_FIX.md

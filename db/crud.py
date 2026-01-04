@@ -112,3 +112,27 @@ def update_user_api_key(db: Session, user_id: int, api_key: Optional[str]) -> Op
     db.refresh(user)
     
     return user
+
+
+def search_users_by_username(
+    db: Session, 
+    username: str, 
+    skip: int = 0, 
+    limit: int = 100
+) -> List[User]:
+    """
+    根据用户名搜索用户列表（支持部分匹配）
+    
+    Args:
+        db: 数据库会话
+        username: 用户名（支持部分匹配）
+        skip: 跳过的记录数
+        limit: 返回的最大记录数
+        
+    Returns:
+        匹配的用户列表
+    """
+    # 使用 SQL LIKE 进行部分匹配查询
+    query = db.query(User).filter(User.username.contains(username))
+    
+    return query.offset(skip).limit(limit).all()

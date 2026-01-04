@@ -86,11 +86,41 @@ const themes = {
     }
 };
 
-// API 服务层（保留原有逻辑）
+// API 服务层（保留原有逻辑，增强错误处理）
 const apiService = {
+    /**
+     * 安全地解析 JSON 响应
+     * 处理非 JSON 格式的错误响应（如 500 错误可能返回纯文本）
+     */
+    async safeJsonResponse(response) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            try {
+                return await response.json();
+            } catch (e) {
+                // JSON 解析失败，返回错误信息
+                const text = await response.text();
+                throw new Error(`服务器返回了非 JSON 格式的响应: ${text.substring(0, 100)}`);
+            }
+        } else {
+            // 非 JSON 响应（可能是 HTML 错误页面或纯文本）
+            const text = await response.text();
+            throw new Error(`服务器错误 (${response.status}): ${text.substring(0, 200)}`);
+        }
+    },
+    
     async checkAuth() {
-        const response = await fetch(`${AUTH_BASE}/me`, { credentials: 'include' });
-        return response.ok ? await response.json() : null;
+        try {
+            const response = await fetch(`${AUTH_BASE}/me`, { credentials: 'include' });
+            if (response.ok) {
+                return await this.safeJsonResponse(response);
+            }
+            // 401 或其他错误状态，不抛出异常，返回 null 表示未登录
+            return null;
+        } catch (error) {
+            console.error('检查认证状态失败:', error);
+            return null;
+        }
     },
     
     async login(username, password) {
@@ -100,7 +130,15 @@ const apiService = {
             credentials: 'include',
             body: JSON.stringify({ username, password }),
         });
-        return await response.json();
+        
+        // 检查响应状态
+        if (!response.ok) {
+            // 非 200 状态码，尝试解析错误信息
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `登录失败 (${response.status})`);
+        }
+        
+        return await this.safeJsonResponse(response);
     },
     
     async logout() {
@@ -117,12 +155,20 @@ const apiService = {
             credentials: 'include',
             body: JSON.stringify({ message }),
         });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async getPersona() {
         const response = await fetch(`${API_BASE}/persona`, { credentials: 'include' });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async savePersona(persona) {
@@ -132,12 +178,20 @@ const apiService = {
             credentials: 'include',
             body: JSON.stringify({ persona }),
         });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async getMemory() {
         const response = await fetch(`${API_BASE}/memory`, { credentials: 'include' });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async summarize() {
@@ -145,7 +199,11 @@ const apiService = {
             method: 'POST',
             credentials: 'include',
         });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async clearHistory() {
@@ -153,17 +211,29 @@ const apiService = {
             method: 'POST',
             credentials: 'include',
         });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async getApiKeyStatus() {
         const response = await fetch(`${API_BASE}/profile/api-key`, { credentials: 'include' });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async getApiKeyMasked(provider) {
         const response = await fetch(`${API_BASE}/profile/api-key/${provider}`, { credentials: 'include' });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
     
     async saveApiKey(provider, apiKey) {
@@ -173,7 +243,11 @@ const apiService = {
             credentials: 'include',
             body: JSON.stringify({ provider, api_key: apiKey || null }),
         });
-        return await response.json();
+        if (!response.ok) {
+            const errorData = await this.safeJsonResponse(response);
+            throw new Error(errorData.detail || errorData.error || `请求失败 (${response.status})`);
+        }
+        return await this.safeJsonResponse(response);
     },
 };
 
