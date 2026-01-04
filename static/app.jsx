@@ -348,6 +348,23 @@ function LoginPage({ onLoginSuccess, theme = 'light' }) {
                 <p className={`text-center mt-6 text-sm ${t.textSecondary}`}>
                     还没有账号？请联系管理员创建
                 </p>
+                <div className={`mt-6 pt-6 border-t ${t.border}`}>
+                    <div className={`text-center text-xs ${t.textTertiary} space-y-1`}>
+                        <div>QQ：2656927351</div>
+                        <div>Email：m19956272658@163.com</div>
+                        <div>
+                            GitHub：
+                            <a 
+                                href="https://github.com/Avalianfeng/chat_bot" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={`${t.accentText} hover:underline ml-1`}
+                            >
+                                https://github.com/Avalianfeng/chat_bot
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </MotionDiv>
         </div>
     );
@@ -1075,6 +1092,26 @@ function SettingsPage({ theme, setTheme }) {
                         </div>
                     </div>
                 ))}
+                
+                {/* 联系信息 */}
+                <div className={`${t.card} border rounded-2xl p-6 transition-colors`}>
+                    <h3 className={`text-lg font-semibold mb-4 ${t.textPrimary}`}>联系信息</h3>
+                    <div className={`space-y-2 text-sm ${t.textSecondary}`}>
+                        <div>QQ：2656927351</div>
+                        <div>Email：m19956272658@163.com</div>
+                        <div>
+                            GitHub：
+                            <a 
+                                href="https://github.com/Avalianfeng/chat_bot" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={`${t.accentText} hover:underline ml-1`}
+                            >
+                                https://github.com/Avalianfeng/chat_bot
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
