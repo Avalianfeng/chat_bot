@@ -375,6 +375,8 @@ function App() {
     const [user, setUser] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const [currentPage, setCurrentPage] = React.useState('chat');
+    const [sidebarOpen, setSidebarOpen] = React.useState(false); // 侧边栏折叠状态
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768); // 检测是否为移动端
     const [theme, setTheme] = React.useState(() => {
         const savedTheme = localStorage.getItem('theme');
         // 确保主题值是有效的
@@ -399,6 +401,23 @@ function App() {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
+    
+    // 监听窗口大小变化，检测是否为移动端
+    React.useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            // 在桌面端自动展开侧边栏，移动端保持当前状态或关闭
+            if (!mobile) {
+                setSidebarOpen(false); // 桌面端不需要折叠状态
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        handleResize(); // 初始化时执行一次
+        
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     
     const checkAuth = async () => {
         try {
@@ -444,15 +463,32 @@ function App() {
     return (
         <ThemeContext.Provider value={theme}>
             <div className={`min-h-screen ${t.bg} transition-colors`}>
-                <div className="flex h-screen">
+                <div className="flex h-screen relative">
+                    {/* 移动端遮罩层 */}
+                    {isMobile && sidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black/50 z-40"
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
+                    
                     {/* 侧边栏 */}
                     <Sidebar
                         user={user}
                         currentPage={currentPage}
-                        onPageChange={setCurrentPage}
+                        onPageChange={(page) => {
+                            setCurrentPage(page);
+                            // 移动端切换页面后自动关闭侧边栏
+                            if (isMobile) {
+                                setSidebarOpen(false);
+                            }
+                        }}
                         onLogout={handleLogout}
                         theme={theme}
                         setTheme={setTheme}
+                        isOpen={sidebarOpen}
+                        isMobile={isMobile}
+                        onClose={() => setSidebarOpen(false)}
                     />
                     
                     {/* 主内容区 */}
@@ -461,6 +497,8 @@ function App() {
                         user={user}
                         theme={theme}
                         setTheme={setTheme}
+                        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+                        isMobile={isMobile}
                     />
                 </div>
             </div>
@@ -469,7 +507,7 @@ function App() {
 }
 
 // Sidebar 组件（A2UI 风格）
-function Sidebar({ user, currentPage, onPageChange, onLogout, theme, setTheme }) {
+function Sidebar({ user, currentPage, onPageChange, onLogout, theme, setTheme, isOpen, isMobile, onClose }) {
     const t = themes[theme];
     const menuItems = [
         { id: 'chat', label: '聊天', icon: '💬' },
@@ -478,12 +516,33 @@ function Sidebar({ user, currentPage, onPageChange, onLogout, theme, setTheme })
         { id: 'settings', label: '设置', icon: '⚙️' },
     ];
     
+    // 侧边栏的样式类
+    const sidebarBaseClasses = `w-64 ${t.bgSecondary} border-r ${t.border} flex flex-col h-screen transition-all duration-300 ease-in-out`;
+    // 移动端：固定定位，可滑动显示/隐藏；桌面端：相对定位，始终显示
+    const sidebarMobileClasses = isMobile 
+        ? `fixed left-0 top-0 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
+        : 'relative translate-x-0';
+    
     return (
-        <div className={`w-64 ${t.bgSecondary} border-r ${t.border} flex flex-col h-screen transition-colors`}>
+        <div className={`${sidebarBaseClasses} ${sidebarMobileClasses}`}>
             <div className={`p-6 border-b ${t.border}`}>
-                <h2 className={`text-xl font-semibold ${t.textPrimary} mb-3`}>
-                    AI聊天机器人
-                </h2>
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className={`text-xl font-semibold ${t.textPrimary}`}>
+                        AI聊天机器人
+                    </h2>
+                    {/* 移动端关闭按钮 */}
+                    {isMobile && onClose && (
+                        <button
+                            onClick={onClose}
+                            className={`p-2 rounded-lg ${t.buttonBase} transition-all ${t.shadowHover}`}
+                            aria-label="关闭菜单"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
                 <div className={`${t.textSecondary} text-sm mb-3`}>
                     用户: <span className={`${t.textPrimary} font-medium`}>{user.username}</span>
                 </div>
@@ -586,11 +645,27 @@ function SummarizeButton({ theme, currentPage }) {
 }
 
 // 主内容区组件
-function MainContent({ currentPage, user, theme, setTheme }) {
+function MainContent({ currentPage, user, theme, setTheme, onMenuClick, isMobile }) {
     const t = themes[theme];
     
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
+            {/* 移动端顶部栏 */}
+            {isMobile && (
+                <div className={`${t.bgSecondary} border-b ${t.border} p-4 flex items-center justify-between z-30`}>
+                    <button
+                        onClick={onMenuClick}
+                        className={`p-2 rounded-lg ${t.buttonBase} transition-all ${t.shadowHover}`}
+                        aria-label="菜单"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <h2 className={`text-lg font-semibold ${t.textPrimary}`}>AI聊天机器人</h2>
+                    <div className="w-10"></div> {/* 占位符，保持标题居中 */}
+                </div>
+            )}
             <AnimatePresence mode="wait">
                 {currentPage === 'chat' && (
                     <ChatPage key="chat" theme={theme} />

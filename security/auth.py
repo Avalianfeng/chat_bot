@@ -14,7 +14,26 @@ def generate_session_id() -> str:
     return secrets.token_urlsafe(32)
 
 
-def create_session(db: Session, user_id: int, expires_hours: int = 24) -> SessionModel:
+def cleanup_expired_sessions(db: Session) -> int:
+    """
+    清理所有过期的会话
+    
+    Args:
+        db: 数据库会话
+        
+    Returns:
+        清理的会话数量
+    """
+    now = datetime.utcnow()
+    expired_sessions = db.query(SessionModel).filter(SessionModel.expires_at <= now).all()
+    count = len(expired_sessions)
+    for session in expired_sessions:
+        db.delete(session)
+    db.commit()
+    return count
+
+
+def create_session(db: Session, user_id: int, expires_hours: int = 24, cleanup_old: bool = True) -> SessionModel:
     """
     创建新的会话
     
@@ -22,10 +41,15 @@ def create_session(db: Session, user_id: int, expires_hours: int = 24) -> Sessio
         db: 数据库会话
         user_id: 用户 ID
         expires_hours: 过期时间（小时），默认 24 小时
+        cleanup_old: 是否在创建新会话时清理过期会话，默认 True
         
     Returns:
         创建的会话对象
     """
+    # 可选：清理过期会话（避免数据库累积太多过期记录）
+    if cleanup_old:
+        cleanup_expired_sessions(db)
+    
     session_id = generate_session_id()
     expires_at = datetime.utcnow() + timedelta(hours=expires_hours)
     
@@ -85,6 +109,44 @@ def delete_session(db: Session, session_id: str) -> bool:
         db.commit()
         return True
     return False
+
+
+def count_active_sessions_for_user(db: Session, user_id: int) -> int:
+    """
+    统计指定用户的活动会话数量（未过期的会话）
+    
+    Args:
+        db: 数据库会话
+        user_id: 用户 ID
+        
+    Returns:
+        活动会话数量
+    """
+    now = datetime.utcnow()
+    count = db.query(SessionModel).filter(
+        SessionModel.user_id == user_id,
+        SessionModel.expires_at > now
+    ).count()
+    return count
+
+
+def delete_all_sessions_for_user(db: Session, user_id: int) -> int:
+    """
+    删除指定用户的所有会话
+    
+    Args:
+        db: 数据库会话
+        user_id: 用户 ID
+        
+    Returns:
+        删除的会话数量
+    """
+    sessions = db.query(SessionModel).filter(SessionModel.user_id == user_id).all()
+    count = len(sessions)
+    for session in sessions:
+        db.delete(session)
+    db.commit()
+    return count
 
 
 def get_current_user(

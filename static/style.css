@@ -600,3 +600,21 @@ body {
         max-width: 85%;
     }
 }
+
+/* 移动端侧边栏样式优化 */
+@media (max-width: 768px) {
+    /* 确保侧边栏在移动端有阴影效果 */
+    .fixed.left-0 {
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* 确保遮罩层在最上层 */
+    .bg-black\/50 {
+        z-index: 40;
+    }
+    
+    /* 移动端主内容区全宽 */
+    .flex-1.flex.flex-col {
+        width: 100%;
+    }
+}

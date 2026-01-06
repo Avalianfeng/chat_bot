@@ -14,7 +14,7 @@ from db.database import init_db, get_db
 from db import crud
 from db.models import User
 from security.password import verify_password
-from security.auth import create_session, delete_session, get_current_user
+from security.auth import create_session, delete_session, get_current_user, count_active_sessions_for_user
 from chat_bot_manager import ChatBotManager
 import json
 
@@ -315,8 +315,12 @@ async def logout(
     if session_id:
         delete_session(db, session_id)
     
-    # 移除该用户的 ChatBot 实例（释放内存）
-    bot_manager.remove_bot_for_user(current_user.id)
+    # 检查该用户是否还有其他活动会话
+    # 只有在最后一个会话登出时才删除 ChatBot 实例
+    active_sessions = count_active_sessions_for_user(db, current_user.id)
+    if active_sessions == 0:
+        # 这是最后一个会话，可以安全删除 ChatBot 实例
+        bot_manager.remove_bot_for_user(current_user.id)
     
     # 删除 Cookie
     response.delete_cookie(key="session_id")
