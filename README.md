@@ -20,29 +20,42 @@
 ```
 my_chat_bot/
 ├── api_providers/          # API提供者模块
+│   ├── __init__.py
 │   ├── base.py            # API提供者基类
 │   ├── deepseek_provider.py  # DeepSeek API实现
 │   └── openai_provider.py    # OpenAI API实现
 ├── db/                     # 数据库模块
+│   ├── __init__.py
 │   ├── models.py          # 数据库模型（User、Session）
 │   ├── database.py        # 数据库连接和配置
 │   └── crud.py            # 数据库CRUD操作
 ├── security/              # 安全模块
+│   ├── __init__.py
 │   ├── auth.py            # 认证和会话管理
 │   └── password.py        # 密码加密和验证（argon2）
 ├── memory/                # 记忆系统模块
+│   ├── __init__.py
 │   ├── simple_memory.py   # 简单内存记忆
 │   ├── long_term_memory.py  # 长期记忆存储
 │   ├── memory_filter.py   # 记忆过滤器
-│   └── memory_summarizer.py  # 记忆总结器
+│   ├── memory_summarizer.py  # 记忆总结器
+│   └── long_term_memory.json  # 默认长期记忆文件
 ├── persona/               # 人设系统模块
+│   ├── __init__.py
 │   ├── persona_manager.py # 人设管理器
 │   ├── persona_editor.py  # 人设编辑器（CLI）
 │   └── persona.json       # 默认人设配置文件
 ├── static/                # Web静态文件
 │   ├── index.html         # 前端页面
+│   ├── index-react.html   # React版本前端页面
 │   ├── app.jsx            # React前端逻辑
-│   └── style.css          # 前端样式
+│   ├── style.css          # 前端样式
+│   └── data/              # 静态数据目录
+├── this_manage/           # 用户管理脚本目录
+│   ├── manage_accounts.py # 账户管理脚本
+│   ├── clear_all_users.py # 清空所有用户脚本
+│   ├── new_account.py     # 创建新用户脚本
+│   └── search_account.py  # 搜索用户脚本
 ├── data/                  # 数据目录
 │   └── data.db            # SQLite数据库文件
 ├── chat_bot.py            # 核心聊天机器人类
@@ -50,10 +63,6 @@ my_chat_bot/
 ├── config.py              # 配置管理
 ├── main.py                # CLI主程序入口
 ├── web_app.py             # Web应用入口（FastAPI）
-├── manage_accounts.py     # 账户管理脚本（后端）
-├── clear_all_users.py     # 清空所有用户脚本
-├── new_account.py         # 创建新用户脚本
-├── search_account.py      # 搜索用户脚本
 ├── requirements.txt       # Python依赖
 └── README.md              # 项目说明文档
 ```
@@ -154,13 +163,13 @@ python main.py
 ### 创建用户
 
 ```bash
-python new_account.py
+python this_manage/new_account.py
 ```
 
 ### 账户管理（后端）
 
 ```bash
-python manage_accounts.py
+python this_manage/manage_accounts.py
 ```
 
 功能：
@@ -168,10 +177,16 @@ python manage_accounts.py
 - 修改密码
 - 删除账户（包括相关文件）
 
+### 搜索用户
+
+```bash
+python this_manage/search_account.py
+```
+
 ### 清空所有用户（适配新加密算法）
 
 ```bash
-python clear_all_users.py
+python this_manage/clear_all_users.py
 ```
 
 ## 📝 主要功能

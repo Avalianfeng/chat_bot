@@ -1,5 +1,5 @@
 # Python
-__pycache__/
+__pycache__/ # 缓存文件
 *.py[cod]
 *$py.class
 *.so
